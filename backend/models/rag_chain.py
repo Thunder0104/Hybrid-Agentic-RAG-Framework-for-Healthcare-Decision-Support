@@ -1,124 +1,132 @@
 # backend/models/rag_chain.py
 
-from pathlib import Path
-# from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_huggingface import HuggingFaceEmbeddings
-# from langchain_community.vectorstores import Chroma
-from langchain_chroma import Chroma
-from langchain_classic.retrievers import EnsembleRetriever
+from langchain_openai import OpenAI
 from langchain_classic.chains import RetrievalQA
-from langchain_openai import ChatOpenAI
+from langchain_classic.retrievers import EnsembleRetriever
 from langchain_core.prompts import PromptTemplate
+from langchain_community.vectorstores import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
+
 
 class RAGHealthAssistant:
-    def __init__(self,
-                 symptom_store_path="vectorstore/symptom_store",
-                 encyclopedia_store_path="vectorstore/encyclopedia_store",
-                 llm_model="gpt-4o-mini",
-                 symptom_weight=0.6,
-                 encyclopedia_weight=0.4):
+    def __init__(
+        self,
+        symptom_store_path="vectorstore/symptom_store",
+        encyclopedia_store_path="vectorstore/encyclopedia_store",
+        openai_api_key=None,
+        symptom_weight=0.3,
+        encyclopedia_weight=0.7,
+    ):
         """
-        Hybrid RAG Assistant that retrieves from:
-        1. Symptom store (CSV knowledge)
-        2. Encyclopedia store (PDF knowledge)
-        and generates medical explanations with preventive advice.
+        Hybrid RAG assistant uses:
+        - Symptom store (CSV knowledge)
+        - Encyclopedia store (PDF knowledge)
+        - OpenAI GPT models for answer generation
         """
 
         print("Initializing RAGHealthAssistant...")
 
-        self.embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+        self.api_key = openai_api_key
 
-        # 1. Load vectorstores
+        # Embeddings (for Chroma)
+        self.embeddings = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
+        )
+
+        # Load symptom vectorstore
         self.symptom_store = Chroma(
             persist_directory=symptom_store_path,
-            embedding_function=self.embeddings
+            embedding_function=self.embeddings,
         )
 
+        # Load encyclopedia vectorstore
         self.encyclopedia_store = Chroma(
             persist_directory=encyclopedia_store_path,
-            embedding_function=self.embeddings
+            embedding_function=self.embeddings,
         )
 
-        # 2. Create retrievers
-        self.symptom_retriever = self.symptom_store.as_retriever(search_kwargs={"k": 3})
-        self.encyclopedia_retriever = self.encyclopedia_store.as_retriever(search_kwargs={"k": 3})
+        # Two retrievers with k=3
+        self.symptom_retriever = self.symptom_store.as_retriever(
+            search_type="similarity", search_kwargs={"k": 3}
+        )
+        self.encyclopedia_retriever = self.encyclopedia_store.as_retriever(
+            search_type="similarity", search_kwargs={"k": 3}
+        )
 
-        # 3️. Combine both retrievers (weighted)
+        # Combine both retrievers
         self.retriever = EnsembleRetriever(
-            retrievers=[self.symptom_retriever, self.encyclopedia_retriever],
-            weights=[symptom_weight, encyclopedia_weight]
+            # retrievers=[self.symptom_retriever, self.encyclopedia_retriever],
+            # weights=[symptom_weight, encyclopedia_weight],
+            retrievers=[self.encyclopedia_retriever, self.symptom_retriever],
+            weights=[encyclopedia_weight, symptom_weight],
         )
 
-        # 4️. Initialize LLM (you can swap this for a local model)
-        # self.llm = ChatOpenAI(model=llm_model, temperature=0.3)
-
-        from transformers import pipeline
-        from langchain_huggingface import HuggingFacePipeline
-        generator = pipeline("text-generation", model="google/flan-t5-large", max_new_tokens=256)
-        self.llm = HuggingFacePipeline(pipeline=generator)
-
-        # from transformers import pipeline
-        # from langchain_huggingface import HuggingFacePipeline
-
-        # generator = pipeline("text2text-generation", model="google/flan-t5-large", max_new_tokens=256)
-        # self.llm = HuggingFacePipeline(pipeline=generator)
-
-        # generator = pipeline(
-        #     "text-generation",
-        #     model="mistralai/Mistral-7B-Instruct-v0.2",
-        #     max_new_tokens=512,
-        #     temperature=0.4,
-        #     device_map="auto"
-        # )
-        # self.llm = HuggingFacePipeline(pipeline=generator)
-
-
-        # 5. Create the RAG prompt
+        # Prompt template
         prompt_template = """
-        You are an intelligent healthcare assistant combining structured and unstructured knowledge.
-        Use the provided context from medical encyclopedias and symptom databases to answer accurately.
+You are an intelligent medical assistant. Use the context to answer accurately.
+If the user asks about a disease or symptom:
+- Explain what it is
+- Provide symptoms, causes, risks
+- Provide 3-4 precautions or treatment recommendations
+- Be factual, safe, and helpful
 
-        If the user asks about a disease or symptom:
-        - Explain what it is
-        - Describe causes and symptoms
-        - Provide 3-4 precautions or treatment recommendations if available
-        - Maintain a clear, factual, and non-diagnostic tone
+Context:
+{context}
 
-        Context:
-        {context}
+Question:
+{question}
 
-        Question:
-        {question}
-
-        Answer:
+Answer:
         """
-        self.prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
 
-        # 6. Define RAG chain
+        self.prompt = PromptTemplate(
+            input_variables=["context", "question"], template=prompt_template
+        )
+
+        # LLM (OpenAI)
+        self.llm = OpenAI(
+            model="gpt-4o-mini",
+            temperature=0.3,
+            openai_api_key=self.api_key,
+        )
+
+        # Build RetrievalQA Chain
         self.qa_chain = RetrievalQA.from_chain_type(
             llm=self.llm,
             chain_type="stuff",
             retriever=self.retriever,
+            return_source_documents=True,
             chain_type_kwargs={"prompt": self.prompt},
-            return_source_documents=True
         )
 
-        print("RAGHealthAssistant ready.")
+        print("RAGHealthAssistant ready.\n")
 
     def query(self, question: str):
-        """Query the hybrid retriever (symptom + encyclopedia)."""
-        print(f"Querying RAG system for: {question}")
-        # response = self.qa_chain(question)
-        response = self.qa_chain.invoke(question)
+        """Run a RAG query through OpenAI with both retrievers."""
+        print(f"Querying RAG system for: {question}\n")
+
+        response = self.qa_chain.invoke({"query": question})
+        # print(response)
         answer = response["result"]
-        sources = [doc.metadata.get("source", "") for doc in response["source_documents"]]
+        # sources = [doc.metadata.get("source", "") for doc in response["source_documents"]]
+        sources = []
+        for doc in response["source_documents"]:
+            meta = doc.metadata
+            if "disease" in meta:
+                sources.append(f"{meta.get('source')} (disease: {meta.get('disease')})")
+            elif "page" in meta:
+                sources.append(f"{meta.get('source')} (page: {meta.get('page')})")
+            else:
+                sources.append(meta.get("source"))
+
         return {"answer": answer, "sources": sources}
 
 
-# Quick test
+# Quick standalone test
 if __name__ == "__main__":
-    rag = RAGHealthAssistant()
-    query = "What precautions should I take for diabetes?"
-    result = rag.query(query)
+    import os
+
+    rag = RAGHealthAssistant(openai_api_key=os.getenv("OPENAI_API_KEY"))
+    result = rag.query("What precautions should I take for diabetes?")
     print("\nAnswer:\n", result["answer"])
     print("\nSources:\n", result["sources"])
