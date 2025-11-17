@@ -28,7 +28,7 @@ def build_pdf_vectorstore():
     print(f"Loaded {len(all_docs)} pages from {len(pdf_files)} PDFs")
 
     # Split text
-    splitter = RecursiveCharacterTextSplitter(chunk_size=800, chunk_overlap=100)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=100)
     # splitter = RecursiveCharacterTextSplitter(chunk_size=400, chunk_overlap=50)
     split_docs = splitter.split_documents(all_docs)
 
