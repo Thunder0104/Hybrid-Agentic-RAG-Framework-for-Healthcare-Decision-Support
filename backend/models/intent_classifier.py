@@ -21,8 +21,8 @@ class IntentClassifier:
         self.prompt = ChatPromptTemplate.from_messages([
             ("system", 
             "Classify the user query into exactly one category:\n"
-            "1. symptoms → if the user describes bodily problems, discomfort, or health complaints.\n"
-            "2. general_medical → if the user asks for explanations, definitions, or facts.\n"
+            "1. symptoms -> if the user describes bodily problems, discomfort, or health complaints.\n"
+            "2. general_medical -> if the user asks for explanations, definitions, or facts.\n"
             "Return ONLY the category name."
             ),
             ("user", "{query}")
