@@ -55,5 +55,6 @@ class DiseasePredictor:
 if __name__ == "__main__":
     predictor = DiseasePredictor()
     # result = predictor.predict(["itching", "skin_rash", "nodal_skin_eruptions"])
-    result = predictor.predict(["weight_loss", "nausea", "muscle_pain"])
+    # result = predictor.predict(["weight_loss", "nausea", "muscle_pain"])
+    result = predictor.predict(['throat_pain', 'cough'])
     print(result)

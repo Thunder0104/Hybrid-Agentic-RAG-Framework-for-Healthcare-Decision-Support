@@ -59,7 +59,7 @@ def train_predictor():
 
     # collect the full symptom universe
     all_symptoms = sorted({s for sub in df["Symptoms"] for s in sub})
-
+    print(all_symptoms)
     # introduce noise (controlled)
     df["Symptoms_noisy"] = df["Symptoms"].apply(
         lambda syms: add_noise(syms, all_symptoms)
