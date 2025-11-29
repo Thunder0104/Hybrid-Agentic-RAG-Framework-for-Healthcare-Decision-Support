@@ -47,24 +47,15 @@ class AskRequest(BaseModel):
 def ask_api(req: AskRequest):
     session_id = req.session_id or str(uuid.uuid4())
 
-    rag_result = rag.query_with_history(req.history + [
-        {"role": "user", "content": req.user_query}
-    ])
-
-    rag_context = rag_result.get("answer", "")
-    rag_sources = rag_result.get("sources", [])
-
-    agent_result = agent.run(
+    result = agent.run(
         user_query=req.user_query,
         session_id=session_id,
         history=req.history,
-        rag_context=rag_context
     )
 
     return {
         "session_id": session_id,
-        "answer": agent_result["final_answer"],
-        "sources": rag_sources
+        "answer": result["final_answer"],
     }
 
 

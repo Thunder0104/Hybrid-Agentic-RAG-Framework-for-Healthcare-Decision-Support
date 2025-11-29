@@ -89,6 +89,7 @@ Answer:
             model="gpt-4o-mini",
             temperature=0.3,
             openai_api_key=self.api_key,
+            max_tokens= 1024
         )
 
         # Build RetrievalQA Chain
