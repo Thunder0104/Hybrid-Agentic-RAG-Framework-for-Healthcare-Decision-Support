@@ -112,15 +112,20 @@
 /* Main chat area */
 .chat-main {
   flex: 1;
+  width: 100%;
   overflow: hidden;
   display: flex;
+  flex-direction: column; 
   justify-content: center;
 }
 
 .chat-messages {
-  width: 100%;
-  max-width: 900px;
-  padding: 16px 16px 80px;
+  flex: 1;
+  width: 95%;
+  /* max-width: 900px; */
+  margin: 0 auto;
+  /* padding: 16px 0px 80px; */
+  padding: 16px 24px 30px 24px;
   overflow-y: auto;
 }
 
@@ -167,6 +172,26 @@
   font-size: 14px;
   line-height: 1.5;
   white-space: pre-wrap;
+}
+
+.message-bubble p {
+  margin: 0 0 8px 0;
+}
+
+.message-bubble ul {
+  margin: 0 0 8px 16px;
+  padding: 0;
+}
+
+.message-bubble li {
+  margin-bottom: 4px;
+}
+
+.message-bubble h1,
+.message-bubble h2,
+.message-bubble h3,
+.message-bubble h4 {
+  margin: 6px 0;
 }
 
 .message-bubble-user {

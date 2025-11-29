@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
+import { Info } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 // Your custom chat conditions
 const CHAT_CONDITIONS = {
@@ -233,13 +235,28 @@ export default function App() {
 
       const data = await response.json();
       console.log(data)
-      const assistantText =
-        data.answer || data.message || "No answer field found in response.";
+      let assistantText = "";
+
+      if (typeof data.answer === "string") {
+        // simple string answer (rare case)
+        assistantText = data.answer;
+      } else if (typeof data.answer === "object" && data.answer !== null) {
+        // structured answer from agentic graph
+        assistantText =
+          data.answer.rag_answer ||
+          data.answer.explanation ||
+          JSON.stringify(data.answer, null, 2);
+      } else {
+        assistantText = "No answer received.";
+      }
+
+      assistantText = assistantText.trim();
 
       const assistantMessage = {
         id: `assistant-${Date.now()}`,
         role: "assistant",
         content: assistantText,
+        raw: data.answer, 
       };
 
       // Append assistant message to active conversation
@@ -368,33 +385,33 @@ export default function App() {
 
             <div ref={bottomRef} />
           </div>
+          <footer className="chat-footer">
+            {error && <div className="chat-error">{error}</div>}
+            <div className="chat-input-container">
+              <textarea
+                className="chat-input"
+                placeholder='Describe your question or context (e.g., "Help me understand this lab result…")'
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                rows={3}
+              />
+              <button
+                className="chat-send-button"
+                onClick={handleSend}
+                disabled={isSending}
+              >
+                {isSending ? "Sending..." : "Ask"}
+              </button>
+            </div>
+            <div className="chat-footer-note">
+              This tool supports clinical reasoning but is not a substitute for
+              professional medical advice, diagnosis, or treatment.
+            </div>
+          </footer>
         </main>
       </div>
 
-      <footer className="chat-footer">
-        {error && <div className="chat-error">{error}</div>}
-        <div className="chat-input-container">
-          <textarea
-            className="chat-input"
-            placeholder='Describe your question or context (e.g., "Help me understand this lab result…")'
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            rows={1}
-          />
-          <button
-            className="chat-send-button"
-            onClick={handleSend}
-            disabled={isSending}
-          >
-            {isSending ? "Sending..." : "Ask"}
-          </button>
-        </div>
-        <div className="chat-footer-note">
-          This tool supports clinical reasoning but is not a substitute for
-          professional medical advice, diagnosis, or treatment.
-        </div>
-      </footer>
     </div>
   );
 }
@@ -403,6 +420,9 @@ function MessageBubble({ message }) {
   const isUser = message.role === "user";
   const icon = isUser ? "🧑‍⚕️" : "🩺";
   const label = isUser ? "Clinician / User" : "Decision Support Assistant";
+
+  // Expand/collapse details
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <div
@@ -413,21 +433,90 @@ function MessageBubble({ message }) {
       <div className="message-avatar">
         <span>{icon}</span>
       </div>
+
       <div className="message-content-wrapper">
         <div className="message-label">{label}</div>
+
+        {/* Bubble */}
         <div
           className={`message-bubble ${
             isUser ? "message-bubble-user" : "message-bubble-assistant"
           }`}
         >
-          {message.content}
+          {/* MAIN ANSWER (rag_answer or plain text) */}
+          <ReactMarkdown>{message.content}</ReactMarkdown>
+
+          {/* INFO BUTTON (Assistant messages only) */}
+          {!isUser && message.raw && (
+            <button
+              className="info-button"
+              onClick={() => setExpanded((prev) => !prev)}
+              style={{
+                marginTop: "6px",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+                color: "#007bff",
+              }}
+            >
+              <Info size={16} />
+              <span>Details</span>
+            </button>
+          )}
         </div>
+
+        {/* EXPANDED DETAILS SECTION */}
+        {expanded && !isUser && message.raw && (
+          <div className="message-details">
+            {message.raw.ml_prediction && (
+              <>
+                <h4>Model Predictions</h4>
+                <ul>
+                  {message.raw.ml_prediction.top_predictions.map((p) => (
+                    <li key={p.disease}>
+                      {p.disease}: {(p.probability * 100).toFixed(1)}%
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            {message.raw.symptoms && (
+              <>
+                <h4>Extracted Symptoms</h4>
+                <p>{message.raw.symptoms.join(", ")}</p>
+              </>
+            )}
+
+            {message.raw.rag_sources && message.raw.rag_sources.length > 0 && (
+              <>
+                <h4>Sources</h4>
+                <ul>
+                  {message.raw.rag_sources.map((src) => (
+                    <li key={src}>{src}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            {message.raw.explanation && (
+              <>
+                <h4>Explanation</h4>
+                <p>{message.raw.explanation}</p>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-// 💭 Typing / thinking bubble (three animated dots)
+
+// Typing / thinking bubble (three animated dots)
 function TypingIndicator() {
   return (
     <div className="message-row message-row-assistant">
