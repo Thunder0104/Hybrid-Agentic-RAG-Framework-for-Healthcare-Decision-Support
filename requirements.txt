@@ -4,3 +4,7 @@ sentence-transformers>=2.2.2
 chromadb>=0.4.15
 fastapi 
 uvicorn
+langchain_openai
+langchain_huggingface
+pandas
+pypdf

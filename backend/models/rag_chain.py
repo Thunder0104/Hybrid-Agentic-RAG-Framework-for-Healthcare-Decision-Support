@@ -6,6 +6,7 @@ from langchain_classic.retrievers import EnsembleRetriever
 from langchain_core.prompts import PromptTemplate
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
+import numpy as np
 
 
 class RAGHealthAssistant:
@@ -121,6 +122,149 @@ Answer:
 
         return {"answer": answer, "sources": sources}
 
+    def query_with_history(self, messages: list):
+        """
+        Multi-turn RAG retrieval using the existing RetrievalQA chain.
+        Leverages:
+        - Ensemble retriever (Chroma stores)
+        - LangChain prompt
+        - OpenAI llm
+        """
+
+        # ------------------------------------
+        # 1. Build a full conversation context
+        # ------------------------------------
+        full_context = "\n".join([f"{m['role']}: {m['content']}" for m in messages])
+
+        # ------------------------------------
+        # 2. Extract last user message
+        # ------------------------------------
+        last_user_msg = ""
+        for m in reversed(messages):
+            if m["role"] == "user":
+                last_user_msg = m["content"]
+                break
+
+        # Safety check
+        if not last_user_msg:
+            return {"answer": "", "sources": []}
+
+        # ------------------------------------
+        # 3. Inject history into the question before sending to RAG
+        # ------------------------------------
+        augmented_query = f"""
+    Previous conversation:
+    {full_context}
+
+    User's latest question:
+    {last_user_msg}
+        """
+
+        # ------------------------------------
+        # 4. Use the existing QC chain
+        # ------------------------------------
+        response = self.qa_chain.invoke({"query": augmented_query})
+
+        # Extract answer & sources
+        answer = response["result"]
+
+        sources = []
+        for doc in response["source_documents"]:
+            meta = doc.metadata
+            if "disease" in meta:
+                sources.append(f"{meta.get('source')} (disease: {meta.get('disease')})")
+            elif "page" in meta:
+                sources.append(f"{meta.get('source')} (page: {meta.get('page')})")
+            else:
+                sources.append(meta.get("source"))
+
+        return {
+            "answer": answer,
+            "sources": sources,
+        }
+
+
+    def _retrieve_documents(self, query: str, k: int = 5):
+        """
+        Retrieve top-k documents using FAISS similarity search.
+        """
+        if not query.strip():
+            return []
+
+        # 1. Embed the user query
+        query_embedding = self.embeddings.embed_query(query)
+
+        # 2. Search FAISS index
+        scores, indices = self.faiss_index.search(
+            np.array([query_embedding]).astype("float32"),
+            k
+        )
+
+        docs = []
+        for score, idx in zip(scores[0], indices[0]):
+            if idx == -1:
+                continue
+
+            doc = self.documents[idx]  # assuming list of dicts
+            docs.append({
+                "content": doc["content"],
+                "source": doc.get("source", f"doc_{idx}"),
+                "score": float(score)
+            })
+
+        return docs
+
+    def _rerank_documents(self, docs, chat_context):
+        """
+        Re-rank documents using semantic similarity to the entire conversation context.
+        """
+
+        if not docs:
+            return docs
+
+        # Embed full chat context
+        context_emb = self.embeddings.embed_query(chat_context)
+
+        reranked = []
+        for d in docs:
+            doc_emb = self.embeddings.embed_query(d["content"])
+            similarity = self._cosine_similarity(context_emb, doc_emb)
+            reranked.append({**d, "rerank_score": similarity})
+
+        # Sort by rerank score desc
+        reranked = sorted(reranked, key=lambda x: x["rerank_score"], reverse=True)
+
+        return reranked
+
+    def _cosine_similarity(self, a, b):
+        return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-10))
+
+    def _generate_answer(self, context: str, docs: list):
+        """
+        Generate an LLM answer using conversation context + documents.
+        """
+
+        combined_sources = "\n\n".join(
+            [f"[{i+1}] {d['content']}" for i, d in enumerate(docs)]
+        )
+
+        prompt = f"""
+    You are a clinical decision-support assistant.
+    Use only the provided medical evidence.
+    Explain findings carefully and safely.
+
+    ### Conversation Context:
+    {context}
+
+    ### Retrieved Medical Knowledge:
+    {combined_sources}
+
+    ### Task:
+    Provide a medically accurate explanation using the above sources.
+    """
+
+        response = self.llm.invoke(prompt)
+        return response
 
 # Quick standalone test
 if __name__ == "__main__":

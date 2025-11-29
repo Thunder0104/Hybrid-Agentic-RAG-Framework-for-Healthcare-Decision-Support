@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
 
-// 🔒 Your custom chat conditions
+// Your custom chat conditions
 const CHAT_CONDITIONS = {
   maxLength: 600,
   cooldownMs: 2000, // user must wait 2s between messages
@@ -18,20 +18,26 @@ const initialSystemMessage = {
     "Welcome to the Healthcare Decision Support Assistant. I can help you interpret information and explore options, but I do not replace a licensed healthcare professional or provide a diagnosis.",
 };
 
-function createNewConversation() {
-  const id =
-    (typeof crypto !== "undefined" && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `conv-${Date.now()}`);
+function createNewConversation(session_id = null) {
   const now = Date.now();
+
+  // If backend gives a session_id then use it
+  const id = session_id
+    ? session_id
+    : (typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `conv-${now}`);
+
   return {
-    id,
+    id: id,
+    session_id: id,
     title: "New chat",
     createdAt: now,
     updatedAt: now,
     messages: [initialSystemMessage],
   };
 }
+
 
 function getInitialChatState() {
   if (typeof window === "undefined") {
@@ -208,15 +214,16 @@ export default function App() {
     setLastSentAt(Date.now());
 
     try {
-      // 🔗 CALL YOUR AGENTIC + RAG BACKEND HERE
-      const response = await fetch("/api/chat", {
+      // CALL YOUR AGENTIC + RAG BACKEND HERE
+      const response = await fetch("/api/ask", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: trimmed,
+          user_query: trimmed,
           history: historyForBackend, // full conversation history
+          session_id: activeConversation.session_id
         }),
       });
 
@@ -225,7 +232,7 @@ export default function App() {
       }
 
       const data = await response.json();
-
+      console.log(data)
       const assistantText =
         data.answer || data.message || "No answer field found in response.";
 
@@ -267,12 +274,23 @@ export default function App() {
     }
   };
 
-  const handleNewChat = () => {
-    const newConv = createNewConversation();
+  const handleNewChat = async () => {
+    // 1. Call backend to get a new session ID
+    const response = await fetch("api/session/start", {
+      method: "POST",
+    });
+    const data = await response.json();
+    const sessionId = data.session_id;
+
+    // 2. Create conversation with this sessionId
+    const newConv = createNewConversation(sessionId);
+
+    // 3. Add to chat state
     setChatState((prev) => ({
       conversations: [newConv, ...prev.conversations],
       activeConversationId: newConv.id,
     }));
+
     setInput("");
     setError("");
     setIsSending(false);

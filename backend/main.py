@@ -1,6 +1,7 @@
 # backend/main.py
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import uuid
@@ -18,6 +19,14 @@ import os
 
 app = FastAPI(title="Hybrid Agentic-Rag Backend")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Initialize all components across backend
 agent = AgenticGraph()
 intent_classifier = IntentClassifier()
@@ -30,18 +39,34 @@ rag = RAGHealthAssistant(openai_api_key=os.getenv("OPENAI_API_KEY"))
 
 class AskRequest(BaseModel):
     user_query: str
+    history: list = []
     session_id: Optional[str] = None
 
 
-@app.post("/ask")
+@app.post("/api/ask")
 def ask_api(req: AskRequest):
     session_id = req.session_id or str(uuid.uuid4())
-    result = agent.run(req.user_query, session_id=session_id)
+
+    rag_result = rag.query_with_history(req.history + [
+        {"role": "user", "content": req.user_query}
+    ])
+
+    rag_context = rag_result.get("answer", "")
+    rag_sources = rag_result.get("sources", [])
+
+    agent_result = agent.run(
+        user_query=req.user_query,
+        session_id=session_id,
+        history=req.history,
+        rag_context=rag_context
+    )
 
     return {
         "session_id": session_id,
-        "final_answer": result["final_answer"]
+        "answer": agent_result["final_answer"],
+        "sources": rag_sources
     }
+
 
 # Component APIs/ENDPOINTS
 
@@ -49,13 +74,13 @@ class TextPayload(BaseModel):
     text: str
 
 
-@app.post("/debug/intent")
+@app.post("/api/debug/intent")
 def debug_intent(req: TextPayload):
     intent = intent_classifier.classify(req.text)
     return {"intent": intent}
 
 
-@app.post("/debug/symptoms")
+@app.post("/api/debug/symptoms")
 def debug_symptoms(req: TextPayload):
     symptoms = symptom_extractor.extract(req.text)
     return {"symptoms": symptoms}
@@ -65,7 +90,7 @@ class PredictorPayload(BaseModel):
     symptoms: List[str]
 
 
-@app.post("/debug/predict")
+@app.post("/api/debug/predict")
 def debug_predict(req: PredictorPayload):
     prediction = predictor.predict(req.symptoms)
     return prediction
@@ -76,7 +101,7 @@ class OrchestratorPayload(BaseModel):
     symptoms: List[str]
 
 
-@app.post("/debug/orchestrator")
+@app.post("/api/debug/orchestrator")
 def debug_orchestrator(req: OrchestratorPayload):
     result = orchestrator.process_symptom_query(
         req.user_query,
@@ -90,14 +115,14 @@ class RagQueryPayload(BaseModel):
     query: str
 
 
-@app.post("/rag/query")
+@app.post("api/rag/query")
 def rag_query(req: RagQueryPayload):
     result = rag.query(req.query)
     return result
 
 # SESSION MANAGEMENT ENDPOINTS
 
-@app.post("/session/start")
+@app.post("api/session/start")
 def session_start():
     session_id = str(uuid.uuid4())
     return {"session_id": session_id}
@@ -107,7 +132,7 @@ class SessionEndPayload(BaseModel):
     session_id: str
 
 
-@app.post("/session/end")
+@app.post("api/session/end")
 def session_end(req: SessionEndPayload):
     # MemorySaver auto-cleans entries per thread_id
     return {"status": "terminated", "session_id": req.session_id}

@@ -8,7 +8,9 @@ from backend.models.intent_classifier import IntentClassifier
 from backend.models.symptom_extractor import SymptomExtractor
 from backend.models.orchestrator import Orchestrator
 from backend.models.rag_chain import RAGHealthAssistant
+from backend.models.predictor import DiseasePredictor
 import os
+from pathlib import Path
 from typing_extensions import TypedDict
 
 class AgentState(TypedDict, total=False):
@@ -21,10 +23,13 @@ class AgentState(TypedDict, total=False):
 class AgenticGraph:
 
     def __init__(self, api_key: str =None, model_path: str =None):
+        self.memory = {} 
         self.intent_classifier = IntentClassifier()
         self.symptom_extractor = SymptomExtractor()
         self.orchestrator = Orchestrator()
         self.rag = RAGHealthAssistant(openai_api_key=os.getenv("OPENAI_API_KEY"))
+        MODEL_PATH = Path(__file__).resolve().parent / "artifacts" / "predictor.pkl"
+        self.predictor = DiseasePredictor(model_path=MODEL_PATH)
 
         # LangGraph definition
         graph = StateGraph(
@@ -107,5 +112,115 @@ class AgenticGraph:
 
     # ------ Public API ----------
 
-    def run(self, user_query: str, session_id : str = None):
-        return self.graph.invoke({"user_query": user_query},config={"configurable": {"thread_id": session_id}})
+    def run(self, user_query, session_id=None, history=None, rag_context=""):
+        """
+        Multi-turn Agentic reasoning pipeline.
+        Only the LangGraph call receives thread_id config.
+        """
+
+        # ---------------------------
+        # 1. Initialize session memory
+        # ---------------------------
+        if session_id not in self.memory:
+            self.memory[session_id] = {
+                "symptoms": [],
+                "intent_history": [],
+                "conversation_log": []
+            }
+
+        session_memory = self.memory[session_id]
+
+        # Save conversation turn
+        session_memory["conversation_log"].append({
+            "user": user_query,
+            "history": history or []
+        })
+
+        # ---------------------------
+        # 2. Merge history + context
+        # ---------------------------
+        merged_history = ""
+        if history:
+            merged_history = "\n".join(
+                [f"{m['role']}: {m['content']}" for m in history]
+            )
+
+        full_context = f"""
+    Conversation History:
+    {merged_history}
+
+    RAG Context:
+    {rag_context}
+
+    User Query:
+    {user_query}
+    """
+
+        # ---------------------------
+        # 3. Intent Classification
+        # ---------------------------
+        intent = self.intent_classifier.classify(full_context)
+        session_memory["intent_history"].append(intent)
+
+        # ---------------------------
+        # 4. Symptom Extraction
+        # ---------------------------
+        new_symptoms = self.symptom_extractor.extract(user_query)
+
+        # Merge symptoms
+        for s in new_symptoms:
+            if s not in session_memory["symptoms"]:
+                session_memory["symptoms"].append(s)
+
+        # ---------------------------
+        # 5. Prediction using combined symptoms
+        # ---------------------------
+        prediction = self.predictor.predict(session_memory["symptoms"])
+
+        # ---------------------------
+        # 6. Run LangGraph with thread_id
+        # ---------------------------
+        config = {"configurable": {"thread_id": session_id}}
+
+        graph_output = self.graph.invoke(
+            {
+                "user_query": user_query,
+                "symptoms": session_memory["symptoms"],
+                "history": history,
+                "rag_context": rag_context
+            },
+            config=config
+        )
+
+        # ---------------------------
+        # 7. Orchestrator final reasoning layer
+        # ---------------------------
+        reasoning_output = self.orchestrator.process_symptom_query(
+            user_query=user_query,
+            symptoms=session_memory["symptoms"]
+        )
+
+        # ---------------------------
+        # 8. Return final structured answer
+        # ---------------------------
+        final_answer = f"""
+    **Assistant Clinical Summary**
+
+    **Interpreted Intent:** {intent}
+    **Symptoms (all turns):** {session_memory['symptoms']}
+    **Prediction:** {prediction}
+
+    **Reasoning:**
+    {reasoning_output}
+
+    **Agentic Graph Output:**
+    {graph_output}
+
+    **RAG Context Used:**
+    {rag_context}
+    """
+
+        return {
+            "final_answer": final_answer
+        }
+
