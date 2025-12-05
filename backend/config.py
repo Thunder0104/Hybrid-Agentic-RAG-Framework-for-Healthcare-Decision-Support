@@ -9,6 +9,7 @@ MODEL_DIR = BASE_DIR / "backend" / "models" / "artifacts"
 
 # Dataset paths
 DISEASE_SYMPTOM_PATH = DATA_DIR / "dataset.csv"
+MENDELEY_SYMPTOM_PATH = DATA_DIR / "mendeley_symptoms.csv"
 
 # Saved model path
 PREDICTOR_MODEL_PATH = MODEL_DIR / "predictor.pkl"
