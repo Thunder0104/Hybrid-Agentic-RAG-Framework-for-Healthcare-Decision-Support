@@ -115,7 +115,8 @@ Answer:
         for doc in response["source_documents"]:
             meta = doc.metadata
             if "disease" in meta:
-                sources.append(f"{meta.get('source')} (disease: {meta.get('disease')})")
+                disease = meta.get("disease")
+                sources.append(f"{meta.get('source')} (disease: {disease.strip()})")
             elif "page" in meta:
                 sources.append(f"{meta.get('source')} (page: {meta.get('page')})")
             else:

@@ -106,14 +106,14 @@ class RagQueryPayload(BaseModel):
     query: str
 
 
-@app.post("api/rag/query")
+@app.post("/api/rag/query")
 def rag_query(req: RagQueryPayload):
     result = rag.query(req.query)
     return result
 
 # SESSION MANAGEMENT ENDPOINTS
 
-@app.post("api/session/start")
+@app.post("/api/session/start")
 def session_start():
     session_id = str(uuid.uuid4())
     return {"session_id": session_id}
@@ -123,7 +123,7 @@ class SessionEndPayload(BaseModel):
     session_id: str
 
 
-@app.post("api/session/end")
+@app.post("/api/session/end")
 def session_end(req: SessionEndPayload):
     # MemorySaver auto-cleans entries per thread_id
     return {"status": "terminated", "session_id": req.session_id}
