@@ -19,7 +19,7 @@ The architecture integrates a trained prediction model with multiple vector data
 
 ### Install Python Dependencies
 
-pip install -r requirements.txt
+`pip install -r requirements.txt`
 
 ---
 
@@ -29,7 +29,7 @@ Set the OpenAI API key before running training scripts.
 
 Windows (Command Prompt):
 
-set OPENAI_API_KEY=<your_api_key>
+`set OPENAI_API_KEY=<your_api_key>`
 
 The API key value is available in apikey.txt.
 
@@ -41,23 +41,23 @@ Run the following commands after installing dependencies and setting the API key
 
 ### Train the Prediction Agent
 
-python -m backend.training.train_predictor
+`python -m backend.training.train_predictor`
 
 ### Build Symptom Vector Database(for first time)
 
-python -m backend.training.build_vectorstore_symptom
+`python -m backend.training.build_vectorstore_symptom`
 
 ### Build Encyclopedia / PDF Vector Database(for first time)
 
-python -m backend.training.build_vectorstore_pdf
+`python -m backend.training.build_vectorstore_pdf`
 
 ---
 
 ## Running the Backend Server
 
-uvicorn backend.main:app --reload
+`uvicorn backend.main:app --reload`
 
-Backend runs at http://127.0.0.1:8000
+Backend runs at `http://127.0.0.1:8000`
 
 ---
 
