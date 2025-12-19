@@ -39,7 +39,7 @@ The API key value is available in apikey.txt.
 
 Run the following commands after installing dependencies and setting the API key.
 
-### Train the Prediction Agent
+### Train the Prediction Agent(for first time)
 
 `python -m backend.training.train_predictor`
 
