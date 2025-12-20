@@ -99,6 +99,17 @@ class Orchestrator:
             "explanation": self._gen_explanation(mode),
         }
 
+    def _format_ranked_diseases(self, top_predictions: List[Dict[str, Any]]) -> str:
+        """
+        Formats diseases in ranked order with numbering and percentage confidence.
+        """
+        lines = []
+        for idx, item in enumerate(top_predictions, start=1):
+            disease = item.get("disease", "Unknown")
+            prob = item.get("probability", 0.0)
+            lines.append(f"{idx}. {disease} ({prob * 100:.1f}%)")
+        return "\n".join(lines)
+
     # -----------------------------------------------------------------
     # EXPLANATION TEXT (returned to front-end to describe what happened)
     # -----------------------------------------------------------------
@@ -129,34 +140,46 @@ class Orchestrator:
         return (
             f"The user reports symptoms: {symptoms}\n"
             f"Raw description: \"{user_query}\"\n\n"
-            f"An ML model strongly suggests: {disease} (confidence {prob:.2f}).\n"
-            f"Assume {disease} is most likely.\n\n"
+            f"The ML model produced the following ranked result:\n"
+            f"1. {disease} ({prob * 100:.1f}%)\n\n"
+            f"This is the top-ranked and most likely condition.\n\n"
             f"Please:\n"
             f"1. Explain what {disease} is.\n"
-            f"2. Explain how the listed symptoms relate to {disease}.\n"
-            f"3. Provide precautions, home care, lifestyle advice.\n"
+            f"2. Explain how the listed symptoms relate to it.\n"
+            f"3. Provide precautions, home care, and lifestyle advice.\n"
             f"4. Provide warning signs requiring urgent care.\n"
             f"Do NOT diagnose — provide educational information only."
         )
 
     def _build_medium_confidence_query(self, user_query, symptoms, ml):
-        top_preds = [
-            f"{item['disease']} (~{item['probability']:.2f})"
-            for item in ml.get("top_predictions", [])
-        ]
-        top_preds_str = ", ".join(top_preds)
+        ranked_list = self._format_ranked_diseases(
+            ml.get("top_predictions", [])
+        )
 
         return (
             f"The user reports symptoms: {symptoms}\n"
             f"Raw description: \"{user_query}\"\n\n"
-            f"The ML model is moderately confident.\n"
-            f"Possible diseases: {top_preds_str}\n\n"
-            f"Perform a differential diagnosis:\n"
-            f"- Compare these conditions.\n"
-            f"- Explain what symptoms fit which condition.\n"
+            f"The ML model is moderately confident.\n\n"
+
+            f"IMPORTANT:\n"
+            f"- Reproduce the ranked list EXACTLY as written below.\n"
+            f"- Do NOT remove, paraphrase, or omit percentages.\n"
+            f"- Do NOT change numbering.\n"
+            f"- Do NOT rewrite disease names.\n\n"
+
+            f"Ranked diseases (verbatim, do not modify):\n"
+            f"```text\n"
+            f"{ranked_list}\n"
+            f"```\n\n"
+
+            f"Perform a differential diagnosis using the SAME order:\n"
+            f"- Discuss each disease strictly in the listed order.\n"
+            f"- Explain which symptoms align with each condition.\n"
+            f"- Do NOT change the ranking, numbering, or percentages.\n"
             f"- Do NOT pick a final diagnosis.\n"
             f"- Provide general guidance and precautions.\n"
         )
+
 
     def _build_low_confidence_query(self, user_query, symptoms, ml):
         return (

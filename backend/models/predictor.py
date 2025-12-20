@@ -56,5 +56,7 @@ if __name__ == "__main__":
     predictor = DiseasePredictor()
     # result = predictor.predict(["itching", "skin_rash", "nodal_skin_eruptions"])
     # result = predictor.predict(["weight_loss", "nausea", "muscle_pain"])
-    result = predictor.predict(['throat_pain', 'cough'])
+    # result = predictor.predict(["abdominal_pain", "diarrhoea", "loss_of_appetite"])
+    result = predictor.predict(["frequent_urination", "excessive_hunger", "weight_loss", "fatigue", "blurred_vision", "dehydration"])
+    # result = predictor.predict(['throat_pain', 'cough'])
     print(result)

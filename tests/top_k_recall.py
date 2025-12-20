@@ -23,19 +23,244 @@ Golden dataset format:
 """
 
 golden_dataset = [
-    {
-        "query": "What precautions should I take for diabetes?",
-        "expected_sources": [
-            "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 326)",
-            "symptom_store (disease: Diabetes)",
-        ]
-    },
-    {
-        "query": "What are symptoms of hypertension?",
-        "expected_sources": [
-            "symptom_store (disease: Hypertension)"
-        ]
-    },
+ {
+    "query": "What are key symptoms and causes of Acoustic neuroma?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 58)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 59)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 60)"
+    ]
+  },
+  {
+    "query": "What is Adjustment disorders and how is it diagnosed?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 94)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 94)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 95)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Alzheimer\u2019s disease?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 3371)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1157)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 170)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Aortic valve stenosis?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 398)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1008)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 399)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Atherosclerosis?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 468)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 469)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 470)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Barbiturate-induced coma?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 521)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 520)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 522)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Black lung disease?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 591)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 591)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 592)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Brucellosis?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 702)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 702)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 704)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Cat-scratch disease?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 249)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 774)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 776)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Chagas\u2019 disease?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 835)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 836)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 837)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Chronic granulomatous disease?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 3920)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 916)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 917)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Coronary artery disease?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1046)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1047)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1048)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Diabetic ketoacidosis?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1185)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 4214)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1193)"
+    ]
+  },
+  {
+    "query": "What is Ehlers-Danlos syndrome and how is it diagnosed?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1284)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1288)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1285)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Epididymitis?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1381)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1381)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1383)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Failure to thrive?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1454)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1453)",
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Flesh-eating disease?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1516)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1516)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1516)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Gastroenteritis?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1595)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1595)",
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Glomerulonephritis?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1653)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2632)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1653)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Hairy cell leukemia?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1698)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1698)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1700)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Hemochromatosis?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1775)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1772)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1772)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Hepatitis C?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2272)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1805)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1805)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Hives?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1846)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1847)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1847)"
+    ]
+  },
+  {
+    "query": "What is Hypercoagulation disorders and how is it diagnosed?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1910)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1910)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1915)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Hypocalcemia?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1954)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1942)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1942)"
+    ]
+  },
+  {
+    "query": "What is Idiopathic primary renal hematuric/proteinuric syndrome and how is it diagnosed?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1987)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1987)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 1989)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Ischemia?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2101)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2101)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2102)"
+    ]
+  },
+  {
+    "query": "What is Kidney cancer and what are common symptoms?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2146)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2146)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2148)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Laryngitis?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2198)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2198)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 3973)"
+    ]
+  },
+  {
+    "query": "What are key symptoms and causes of Listeriosis?",
+    "expected_sources": [
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2261)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2260)",
+      "encyclopedia-of-medicine-vol-1-5-3rd-edition.pdf (page: 2262)"
+    ]
+  }
 ]
 
 # ============================================================
