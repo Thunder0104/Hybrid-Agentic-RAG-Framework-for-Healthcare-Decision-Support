@@ -1,0 +1,10 @@
+langchain>=0.1.10
+langchain-community>=0.0.12
+sentence-transformers>=2.2.2
+chromadb>=0.4.15
+fastapi 
+uvicorn
+langchain_openai
+langchain_huggingface
+pandas
+pypdf
