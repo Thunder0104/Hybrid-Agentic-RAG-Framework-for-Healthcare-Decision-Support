@@ -63,13 +63,15 @@ Backend runs at `http://127.0.0.1:8000`
 
 ## Frontend Setup
 
-In a new terminal:
+In a new terminal, run the below commands:
 
-cd frontend  
-npm install  
-npm run start  
+`cd frontend`
 
-Frontend runs at http://localhost:3000
+`npm install`
+
+`npm run start`
+
+Frontend runs at `http://localhost:3000`
 
 ---
 
