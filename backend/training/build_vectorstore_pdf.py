@@ -7,7 +7,7 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from backend.config import DATA_DIR
 
-PDF_FOLDER = DATA_DIR / "encyclopedias"
+PDF_FOLDER = "data/encyclopedias"
 VECTOR_DB_PATH = "vectorstore/encyclopedia_store"
 
 def build_pdf_vectorstore():
