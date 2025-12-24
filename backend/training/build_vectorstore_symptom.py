@@ -6,7 +6,7 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
-from config import DATA_DIR
+from backend.config import DATA_DIR
 
 # Paths
 SYMPTOM_DESC_PATH = DATA_DIR / "symptom_description.csv"
