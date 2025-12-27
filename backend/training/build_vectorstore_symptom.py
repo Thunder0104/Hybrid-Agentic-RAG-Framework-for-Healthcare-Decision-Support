@@ -1,5 +1,7 @@
 # backend/training/build_vectorstore_symptom.py
 
+from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parents[2]))
 import os
 import pandas as pd
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -8,10 +10,11 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from backend.config import DATA_DIR
 
+
 # Paths
-SYMPTOM_DESC_PATH =  "data/symptom_description.csv"
-SYMPTOM_PRECAUTION_PATH = "data/symptom_precaution.csv"
-VECTOR_DB_PATH = "vectorstore/symptom_store"
+SYMPTOM_DESC_PATH =  "data" / "symptom_description.csv"
+SYMPTOM_PRECAUTION_PATH = "data" / "symptom_precaution.csv"
+VECTOR_DB_PATH = "vectorstore" / "symptom_store"
 
 def build_symptom_vectorstore():
     print("Building Symptom Vectorstore...")
