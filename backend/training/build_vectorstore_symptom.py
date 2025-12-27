@@ -9,17 +9,14 @@ from langchain_community.vectorstores import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from backend.config import DATA_DIR
+from backend.config import SYMPTOM_DESC_PATH, SYMPTOM_PRECAUTION_PATH, VECTOR_DB_PATH
 
-# Paths
-SYMPTOM_DESC_PATH = DATA_DIR / "symptom_description.csv"
-SYMPTOM_PRECAUTION_PATH = DATA_DIR / "symptom_precaution.csv"
-VECTOR_DB_PATH = "vectorstore/symptom_store"
 
 def build_symptom_vectorstore():
     print("Building Symptom Vectorstore...")
 
     # Load datasets
-    desc_df = pd.read_csv("data/symptom_description.csv")
+    desc_df = pd.read_csv(SYMPTOM_DESC_PATH)
     prec_df = pd.read_csv(SYMPTOM_PRECAUTION_PATH)
 
     # Merge on Disease
