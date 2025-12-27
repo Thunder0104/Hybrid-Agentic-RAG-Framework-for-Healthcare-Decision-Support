@@ -9,7 +9,7 @@ from langchain_community.vectorstores import Chroma
 from backend.config import DATA_DIR
 
 
-PDF_FOLDER = "data/encyclopedias"
+PDF_FOLDER = Path("data/encyclopedias")
 VECTOR_DB_PATH = "vectorstore/encyclopedia_store"
 
 def build_pdf_vectorstore():
