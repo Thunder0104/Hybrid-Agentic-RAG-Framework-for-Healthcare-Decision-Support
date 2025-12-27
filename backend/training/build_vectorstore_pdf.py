@@ -1,11 +1,13 @@
 # backend/training/build_vectorstore_pdf.py
 
 import os
+from pathlib import Path
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from backend.config import DATA_DIR
+
 
 PDF_FOLDER = "data/encyclopedias"
 VECTOR_DB_PATH = "vectorstore/encyclopedia_store"
@@ -18,7 +20,7 @@ def build_pdf_vectorstore():
     all_docs = []
 
     for file in pdf_files:
-        path = PDF_FOLDER+"/"+file
+        path = PDF_FOLDER / file
         loader = PyPDFLoader(str(path))
         docs = loader.load()
         for doc in docs:
