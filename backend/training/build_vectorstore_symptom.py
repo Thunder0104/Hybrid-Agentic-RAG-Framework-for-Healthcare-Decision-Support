@@ -19,7 +19,7 @@ def build_symptom_vectorstore():
     print("Building Symptom Vectorstore...")
 
     # Load datasets
-    desc_df = pd.read_csv(SYMPTOM_DESC_PATH)
+    desc_df = pd.read_csv("data/symptom_description.csv")
     prec_df = pd.read_csv(SYMPTOM_PRECAUTION_PATH)
 
     # Merge on Disease
