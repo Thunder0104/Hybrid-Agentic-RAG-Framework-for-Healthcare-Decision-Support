@@ -10,7 +10,7 @@ MODEL_DIR = BASE_DIR / "backend" / "models" / "artifacts"
 # Dataset paths
 DISEASE_SYMPTOM_PATH = DATA_DIR / "dataset.csv"
 MENDELEY_SYMPTOM_PATH = DATA_DIR / "mendeley_symptoms.csv"
-SYMPTOM_DESC_PATH = DATA_DIR / "symptom_description.csv"
+SYMPTOM_DESC_PATH = DATA_DIR / "symptom_Description.csv"
 SYMPTOM_PRECAUTION_PATH = DATA_DIR / "symptom_precaution.csv"
 VECTOR_DB_PATH = "vectorstore/symptom_store"
 # Saved model path
