@@ -18,7 +18,7 @@ def build_pdf_vectorstore():
     all_docs = []
 
     for file in pdf_files:
-        path = PDF_FOLDER / file
+        path = PDF_FOLDER+"/"+file
         loader = PyPDFLoader(str(path))
         docs = loader.load()
         for doc in docs:
