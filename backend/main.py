@@ -17,6 +17,7 @@ from backend.models.rag_chain import RAGHealthAssistant
 
 import os
 _components = {}
+print("1,2,3")
 app = FastAPI(title="Hybrid Agentic-Rag Backend")
 
 app.add_middleware(
@@ -30,6 +31,7 @@ app.add_middleware(
 # Initialize all components across backend
 def get_components():
     if not _components:
+        print("Start process!")
         _components["agent"] = AgenticGraph()
         print("agent ready!")
         _components["intent_classifier"] = IntentClassifier()
@@ -47,7 +49,6 @@ def get_components():
     return _components
 
 # AGENT RUN ENDPOINT
-
 class AskRequest(BaseModel):
     user_query: str
     history: list = []
