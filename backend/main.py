@@ -31,13 +31,19 @@ app.add_middleware(
 def get_components():
     if not _components:
         _components["agent"] = AgenticGraph()
+        print("agent ready!")
         _components["intent_classifier"] = IntentClassifier()
+        print("classifier ready!")
         _components["symptom_extractor"] = SymptomExtractor()
+        print("symptom ready!")
         _components["predictor"] = DiseasePredictor(model_path=PREDICTOR_MODEL_PATH)
+        print("predictor ready!")
         _components["orchestrator"] = Orchestrator()
+        print("orcagent ready!")
         _components["rag"] = RAGHealthAssistant(
             openai_api_key=os.getenv("OPENAI_API_KEY")
         )
+        print("ragagent ready!")
     return _components
 
 # AGENT RUN ENDPOINT
